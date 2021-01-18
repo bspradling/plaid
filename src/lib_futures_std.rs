@@ -19,6 +19,7 @@ use crate::types::*;
 ///
 /// See official documentation at: [https://plaid.com/docs](https://plaid.com/docs).
 #[allow(dead_code)]
+#[derive(Clone)]
 pub struct Client {
     client_id: String,
     secret: Secret,
@@ -304,7 +305,45 @@ impl Client {
             .json()
             .await
     }
+
+    /// Fetch identity data
+    ///
+    /// [/identity/get]
+    ///
+    /// Retrieves various account holder information on file with the financial
+    /// institution, including names, emails, phone numbers, and addresses. Only
+    /// name data is guaranteed to be returned; other fields will be empty
+    /// arrays if not provided by the institution.
+    ///
+    /// *Note*: This request may take some time to complete if identity was not
+    /// specified as an initial product when creating the Item. This is because
+    /// Plaid must communicate directly with the institution to retrieve the
+    /// data.
+    ///
+    /// [/identity/get]: https://plaid.com/docs/api/products/#identityget
+    #[allow(dead_code)]
+    pub async fn institution_by_id(&self, institution_id: String, country_codes: Vec<CountryCode>, options: Vec<InstitutionOption>) -> Result<GetInstitutionResponse, ReqwestError> {
+        // TODO: make this strongly typed?
+        let body = json!(GetInstitutionRequest{
+                institution_id: institution_id,
+                client_id: self.client_id.clone(),
+                secret: self.secret.clone(),
+                country_codes: country_codes,
+                options: options,
+            });
+
+        println!("{}", body);
+        self.client
+            .post(&format!("{}/institutions/get_by_id", self.url))
+            .json(&body)
+            .send()
+            .await?
+            .error_for_status()?
+            .json()
+            .await
+    }
 }
+
 
 #[cfg(test)]
 mod tests {

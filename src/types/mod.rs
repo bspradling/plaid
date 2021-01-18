@@ -10,10 +10,12 @@ use serde::{Deserialize, Serialize};
 
 pub use account::*;
 pub use auth::*;
+pub use institution::*;
 pub use token::*;
 
 mod account;
 mod auth;
+mod institution;
 pub(crate) mod serde_utils;
 mod token;
 
@@ -25,7 +27,7 @@ mod token;
 pub struct Secret(SecretString);
 
 impl Secret {
-    fn new(secret: String) -> Self {
+    pub fn new(secret: String) -> Self {
         Self(SecretString::new(secret))
     }
 }
@@ -168,4 +170,23 @@ pub struct Item {
     ///
     /// [RFC 3339]: https://tools.ietf.org/html/rfc3339
     pub consent_expiration_time: Option<chrono::DateTime<chrono::FixedOffset>>,
+}
+
+/// Enumeration of all possible valid country codes for Plaid APIs
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub enum CountryCode {
+    /// Canada
+    CA,
+    /// Spain
+    ES,
+    /// France
+    FR,
+    /// Great Britian
+    GB,
+    /// Ireland
+    IE,
+    /// Netherlands
+    NL,
+    /// United States
+    US,
 }
